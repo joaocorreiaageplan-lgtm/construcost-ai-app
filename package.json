@@ -1,0 +1,15 @@
+{
+  "name": "construcost-ai-app",
+  "version": "1.0.0",
+  "description": "ConstruCost AI - Aplicativo web para gerência de orçamentos",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": ["construcost", "ai", "orcamentos"],
+  "author": "ConstruCost Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
