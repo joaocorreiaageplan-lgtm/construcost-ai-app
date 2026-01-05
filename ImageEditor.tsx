@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Wand2, Loader2, Save, Image as ImageIcon } from 'lucide-react';
 import { editImageWithGemini } from './geminiService';
+const ImageEditor = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
