@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import Layout from './components/Layout';
-import Dashboard from './components/Dashboard';
-import BudgetList from './components/BudgetList';
-import BudgetForm from './components/BudgetForm';
-import ImageEditor from './components/ImageEditor';
-import Settings from './components/Settings';
-import { getBudgets, saveBudget, deleteBudget } from './services/mockDataService';
+import Layout from './Layout';
+import Dashboard from './Dashboard';
+import BudgetList from './BudgetList';
+import BudgetForm from './BudgetForm';
+import ImageEditor from './ImageEditor';
+import Settings from './Settings';
+import { getBudgets, saveBudget, deleteBudget } from './mockDataService';
 import { Budget } from './types';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [editingBudget, setEditingBudget] = useState<Budget | null | undefined>(undefined);
-  
+
   // Função centralizada para recarregar dados do localStorage
   const refreshBudgets = () => {
     setBudgets(getBudgets());
@@ -30,39 +30,28 @@ function App() {
   };
 
   const handleDeleteBudget = (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este orçamento?")) {
-      deleteBudget(id);
-      refreshBudgets();
-    }
+    deleteBudget(id);
+    refreshBudgets();
   };
 
   return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-      {activeTab === 'dashboard' && (
-        <Dashboard onDataUpdated={refreshBudgets} />
-      )}
-      
+    <Layout activeTab={activeTab} onTabChange={setActiveTab}>
+      {activeTab === 'dashboard' && <Dashboard budgets={budgets} />}
       {activeTab === 'budgets' && (
-        <>
-          <BudgetList
-            budgets={budgets}
-            onCreate={() => setEditingBudget(null)}
-            onEdit={(b) => setEditingBudget(b)}
-            onDelete={handleDeleteBudget}
-            onRefresh={refreshBudgets}
-          />
-          {editingBudget !== undefined && (
-            <BudgetForm
-              initialData={editingBudget}
-              onSave={handleSaveBudget}
-              onCancel={() => setEditingBudget(undefined)}
-            />
-          )}
-        </>
+        <BudgetList
+          budgets={budgets}
+          onEdit={setEditingBudget}
+          onDelete={handleDeleteBudget}
+        />
       )}
-
+      {activeTab === 'form' && (
+        <BudgetForm
+          budget={editingBudget}
+          onSave={handleSaveBudget}
+          onCancel={() => setEditingBudget(undefined)}
+        />
+      )}
       {activeTab === 'image-editor' && <ImageEditor />}
-      
       {activeTab === 'settings' && <Settings />}
     </Layout>
   );
