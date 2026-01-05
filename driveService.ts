@@ -24,40 +24,50 @@ export const extractRevisionNumber = (name: string): number => {
 
 /**
  * Realiza a listagem real de arquivos na pasta pública do Google Drive.
- * Utiliza o endpoint de visualização incorporada para obter IDs e nomes sem necessidade de API Key autenticada.
+ * Utiliza abordagem mais robusta para extrair PDFs da pasta 2025.
  */
 export const listLatestPrFiles = async (): Promise<DriveFile[]> => {
   try {
     const url = `https://drive.google.com/embeddedfolderview?id=${ROOT_FOLDER_ID}`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error("Falha ao acessar a pasta do Drive.");
+    if (!response.ok) {
+      console.error('Falha ao acessar a pasta do Drive:', response.status);
+      return [];
+    }
     
     const html = await response.text();
     
-    // Regex para capturar padrões de dados de arquivos no HTML do Drive
-    // Padrão comum em JS de pastas do Drive: ["ID", "NOME", "MIMETYPE", ...]
-    const fileRegex = /"([^"]+)","([^"]+\.pdf)","application\/pdf"/g;
+    // Regex mais flexível para capturar arquivos PDF
+    // Busca por padrões que contenham IDs do Drive (33 caracteres) seguidos de nomes .pdf
     const allFiles: DriveFile[] = [];
+    
+    // Padrão 1: Formato JSON em arrays JavaScript do Drive
+    const jsonPattern = /\["([A-Za-z0-9_-]{25,})",\s*"([^"]*\.pdf[^"]*)"/gi;
     let match;
     
-    while ((match = fileRegex.exec(html)) !== null) {
+    while ((match = jsonPattern.exec(html)) !== null) {
       const id = match[1];
       const name = match[2];
       
-      // Filtrar apenas arquivos que parecem ser IDs válidos do Drive
-      if (id.length > 20) {
-        allFiles.push({
-          id: id,
-          name: name,
-          mimeType: 'application/pdf',
-          webViewLink: `https://drive.google.com/file/d/${id}/view`,
-          modifiedTime: new Date().toISOString(),
-          prCode: extractPRCode(name),
-          revision: extractRevisionNumber(name)
-        });
+      // Filtrar apenas IDs válidos do Drive (geralmente 33 caracteres)
+      if (id.length >= 25 && name.toLowerCase().endsWith('.pdf')) {
+        const prCode = extractPRCode(name);
+        if (prCode) {
+          allFiles.push({
+            id: id,
+            name: name,
+            mimeType: 'application/pdf',
+            webViewLink: `https://drive.google.com/file/d/${id}/view`,
+            modifiedTime: new Date().toISOString(),
+            prCode: prCode,
+            revision: extractRevisionNumber(name)
+          });
+        }
       }
     }
-
+    
+    console.log(`Drive scan: encontrados ${allFiles.length} arquivos PDF com PR code`);
+    
     // Agrupar por PR e selecionar a maior revisão
     const prGroups: Record<string, DriveFile> = {};
     allFiles.forEach(file => {
@@ -67,8 +77,11 @@ export const listLatestPrFiles = async (): Promise<DriveFile[]> => {
         prGroups[file.prCode] = file;
       }
     });
-
-    return Object.values(prGroups);
+    
+    const result = Object.values(prGroups);
+    console.log(`Drive scan: ${result.length} PRs únicos (última revisão)`);
+    return result;
+    
   } catch (error) {
     console.error("Erro ao listar arquivos reais do Drive:", error);
     return [];
@@ -80,7 +93,7 @@ export const listLatestPrFiles = async (): Promise<DriveFile[]> => {
  */
 export const getFileBase64 = async (fileId: string): Promise<string> => {
   try {
-    // Link de download direto para arquivos públicos (contorna restrições de API em arquivos pequenos)
+    // Link de download direto para arquivos públicos
     const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
     
     const response = await fetch(url);
