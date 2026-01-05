@@ -1,6 +1,6 @@
 import React from 'react';
 import { LayoutDashboard, FileSpreadsheet, Image as ImageIcon, Menu, X, Settings, Database } from 'lucide-react';
-import { getSettings } from '../services/mockDataService';
+
 
 interface LayoutProps {
   children: React.ReactNode;
