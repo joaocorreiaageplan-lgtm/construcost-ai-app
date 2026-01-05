@@ -172,7 +172,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ budget, onSave, onCancel }) => 
   };
 
   const validate = () => {
-    const newWarnings = [];
+    const newWarnings: string[] = [];
     if (!formData.clientName) newWarnings.push("Nome do Cliente é obrigatório.");
     if (!formData.serviceDescription) newWarnings.push("Descrição do Serviço é obrigatória.");
     if (!formData.budgetAmount || formData.budgetAmount <= 0) newWarnings.push("Valor do orçamento deve ser maior que 0.");
