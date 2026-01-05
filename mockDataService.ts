@@ -1,4 +1,4 @@
-import { Budget, BudgetStatus, AttachedFile } from '../types';
+import { Budget, BudgetStatus, AttachedFile } from'./types'';
 
 const STORAGE_KEY = 'construcost_budgets';
 const SETTINGS_KEY = 'construcost_settings';
