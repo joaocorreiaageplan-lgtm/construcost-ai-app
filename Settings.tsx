@@ -16,9 +16,8 @@ import { openAiStudioKeySelector, isKeySelected } from './geminiService';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setSetti(prev: any)prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
+    setSettings((prev: any) => ({      ...prev,
+                                       [name]: type === 'checkbox' ? checked : value
     }));
   };
 
