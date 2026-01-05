@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Cloud, CheckCircle, RefreshCw, Folder, Mail, Bell, Key, Database, Download, ExternalLink, Info, ShieldCheck } from 'lucide-react';
 import { getSettings, saveSettings, AppSettings, getBudgets } from './mockDataService'
-import { openAiStudioKeySelector, isKeySe'./geminiService'eminiService';
-
-const Settings: React.FC = () => {
+import { openAiStudioKeySelector, isKeySelected } from './geminiService';
   const [settings, setSettings] = useState<AppSettings>(getSettings());
   const [isSaving, setIsSaving] = useState(false);
   const [hasGoogleKey, setHasGoogleKey] = useState(false);
