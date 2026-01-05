@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Budget, BudgetStatus, AttachedFile } from '../types';
+import { Budget, BudgetStatus, AttachedFile } from ;
 import { X, Save, AlertTriangle, Upload, FileText, Trash2, Sparkles, Loader2, CheckCircle, History, FileCheck, ArrowDown, FileSpreadsheet } from 'lucide-react';
-import { extractBudgetDataFromFiles } from '../services/geminiService';
+import { extractBudgetDataFromFiles } from './geminiService';
 
 interface BudgetFormProps {
   initialData?: Budget | null;
