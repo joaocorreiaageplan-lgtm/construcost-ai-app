@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Budget, BudgetStatus } from '../types';
+import { Budget, BudgetStatus } from './types';
 import { Edit2, Trash2, Search, Filter, Plus, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 interface BudgetListProps {
