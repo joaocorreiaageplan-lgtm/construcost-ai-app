@@ -4,12 +4,12 @@ import { X, Save, AlertTriangle, Upload, FileText, Trash2, Sparkles, Loader2, Ch
 import { extractBudgetDataFromFiles } from './geminiService';
 
 interface BudgetFormProps {
-  initialData?: Budget | null;
+  budget?: Budget | null;
   onSave: (budget: Budget) => void;
   onCancel: () => void;
 }
 
-const BudgetForm: React.FC<BudgetFormProps> = ({ initialData, onSave, onCancel }) => {
+const BudgetForm: React.FC<BudgetFormProps> = ({ budget, onSave, onCancel }) => {
   const [formData, setFormData] = useState<Partial<Budget>>({
     date: new Date().toISOString().split('T')[0],
     status: BudgetStatus.PENDING,
@@ -27,10 +27,10 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ initialData, onSave, onCancel }
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
+    if (budget) {
+      setFormData(budget);
     }
-  }, [initialData]);
+  }, [budget]);
 
   useEffect(() => {
     if (successMessage) {
