@@ -35,7 +35,7 @@ function App() {
   };
 
   return (
-    <Layout activeTab={activeTab} onTabChange={setActiveTab}>
+    <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
       {activeTab === 'dashboard' && <Dashboard budgets={budgets} />}
       {activeTab === 'budgets' && (
         <BudgetList
