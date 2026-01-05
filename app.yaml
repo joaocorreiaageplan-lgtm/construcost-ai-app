@@ -1,0 +1,13 @@
+runtime: nodejs20
+instance_class: F1
+
+handlers:
+  # Servir arquivos estáticos da pasta dist (gerada pelo build)
+  - url: /(.*\.(js|css|png|jpg|svg|ico|json))$
+    static_files: dist/\1
+    upload: dist/.*\.(js|css|png|jpg|svg|ico|json)$
+
+  # Qualquer outra rota deve carregar o index.html (Single Page App)
+  - url: /.*
+    static_files: dist/index.html
+    upload: dist/index.html
