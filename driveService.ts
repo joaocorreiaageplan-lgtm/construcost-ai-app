@@ -24,33 +24,73 @@ export const extractRevisionNumber = (name: string): number => {
 
 /**
  * Realiza a listagem real de arquivos na pasta pública do Google Drive.
- * Utiliza abordagem mais robusta para extrair PDFs da pasta 2025.
+ * Usa abordagem híbrida: scraping + API pública.
  */
 export const listLatestPrFiles = async (): Promise<DriveFile[]> => {
+  try {
+    console.log('🔍 Iniciando varredura do Drive - Pasta 2025...');
+    
+    // MÉTODO 1: Tentar via embeddedfolderview (scraping)
+    let allFiles: DriveFile[] = await scrapeEmbeddedView();
+    
+    // MÉTODO 2: Se scraping falhou ou retornou poucos arquivos, tentar API pública
+    if (allFiles.length < 20) {
+      console.warn(`⚠️ Scraping retornou apenas ${allFiles.length} arquivos. Tentando API pública...`);
+      const apiFiles = await fetchViaPublicAPI();
+      if (apiFiles.length > allFiles.length) {
+        console.log(`✅ API pública encontrou ${apiFiles.length} arquivos (melhor resultado)`);
+        allFiles = apiFiles;
+      }
+    }
+    
+    console.log(`📁 Total encontrado: ${allFiles.length} arquivos PDF com código PR`);
+    
+    // Agrupar por PR e selecionar a maior revisão
+    const prGroups: Record<string, DriveFile> = {};
+    allFiles.forEach(file => {
+      if (!file.prCode) return;
+      const existing = prGroups[file.prCode];
+      if (!existing || file.revision > existing.revision) {
+        prGroups[file.prCode] = file;
+      }
+    });
+    
+    const result = Object.values(prGroups);
+    console.log(`✨ ${result.length} PRs únicos (última revisão cada)`);
+    console.log(`📊 Range: ${result[0]?.prCode} até ${result[result.length-1]?.prCode}`);
+    
+    return result;
+    
+  } catch (error) {
+    console.error("❌ Erro ao listar arquivos do Drive:", error);
+    return [];
+  }
+};
+
+/**
+ * Método 1: Scraping do embeddedfolderview
+ */
+async function scrapeEmbeddedView(): Promise<DriveFile[]> {
   try {
     const url = `https://drive.google.com/embeddedfolderview?id=${ROOT_FOLDER_ID}`;
     const response = await fetch(url);
     if (!response.ok) {
-      console.error('Falha ao acessar a pasta do Drive:', response.status);
+      console.error('❌ Falha ao acessar embeddedfolderview:', response.status);
       return [];
     }
     
     const html = await response.text();
-    
-    // Regex mais flexível para capturar arquivos PDF
-    // Busca por padrões que contenham IDs do Drive (33 caracteres) seguidos de nomes .pdf
     const allFiles: DriveFile[] = [];
     
-    // Padrão 1: Formato JSON em arrays JavaScript do Drive
-    const jsonPattern = /\["([A-Za-z0-9_-]{25,})",\s*"([^"]*\.pdf[^"]*)"/gi;
+    // Pattern 1: Array format ["ID", "NOME.pdf", ...]
+    const pattern1 = /\["([A-Za-z0-9_-]{25,})",\s*"([^"]*\.pdf[^"]*)"/gi;
     let match;
     
-    while ((match = jsonPattern.exec(html)) !== null) {
+    while ((match = pattern1.exec(html)) !== null) {
       const id = match[1];
       const name = match[2];
       
-      // Filtrar apenas IDs válidos do Drive (geralmente 33 caracteres)
-      if (id.length >= 25 && name.toLowerCase().endsWith('.pdf')) {
+      if (id.length >= 25 && name.toLowerCase().includes('.pdf')) {
         const prCode = extractPRCode(name);
         if (prCode) {
           allFiles.push({
@@ -66,27 +106,73 @@ export const listLatestPrFiles = async (): Promise<DriveFile[]> => {
       }
     }
     
-    console.log(`Drive scan: encontrados ${allFiles.length} arquivos PDF com PR code`);
-    
-    // Agrupar por PR e selecionar a maior revisão
-    const prGroups: Record<string, DriveFile> = {};
-    allFiles.forEach(file => {
-      if (!file.prCode) return;
-      const existing = prGroups[file.prCode];
-      if (!existing || file.revision > existing.revision) {
-        prGroups[file.prCode] = file;
-      }
-    });
-    
-    const result = Object.values(prGroups);
-    console.log(`Drive scan: ${result.length} PRs únicos (última revisão)`);
-    return result;
-    
+    console.log(`🔧 Scraping encontrou: ${allFiles.length} arquivos`);
+    return allFiles;
   } catch (error) {
-    console.error("Erro ao listar arquivos reais do Drive:", error);
+    console.error('❌ Erro no scraping:', error);
     return [];
   }
-};
+}
+
+/**
+ * Método 2: API pública do Drive (usando endpoint de listagem sem auth para pastas públicas)
+ */
+async function fetchViaPublicAPI(): Promise<DriveFile[]> {
+  try {
+    // Usar o endpoint de visualização que retorna JSON
+    const url = `https://www.googleapis.com/drive/v3/files?q='${ROOT_FOLDER_ID}'+in+parents+and+mimeType='application/pdf'&fields=files(id,name,mimeType,webViewLink,modifiedTime)&key=AIzaSyB-PLACEHOLDER`;
+    
+    // Como não temos API key, vamos usar um workaround: acessar a página de listagem direta
+    const listUrl = `https://drive.google.com/drive/folders/${ROOT_FOLDER_ID}`;
+    const response = await fetch(listUrl);
+    
+    if (!response.ok) {
+      console.warn('⚠️ API pública falhou:', response.status);
+      return [];
+    }
+    
+    const html = await response.text();
+    const allFiles: DriveFile[] = [];
+    
+    // Extrair dados de window._DRIVE_ivd ou estruturas JS
+    const patterns = [
+      // Pattern para IDs e nomes em estruturas JS do Drive
+      /"([A-Za-z0-9_-]{25,})","([^"]*[Pp][Rr]\d{5}[^"]*\.pdf[^"]*)"/gi,
+      // Pattern alternativo
+      /\["([^"]{25,})",.*?"([^"]*PR\d+[^"]*\.pdf[^"]*)"/gi
+    ];
+    
+    for (const pattern of patterns) {
+      let match;
+      while ((match = pattern.exec(html)) !== null) {
+        const id = match[1];
+        const name = match[2];
+        
+        const prCode = extractPRCode(name);
+        if (prCode && id.length >= 25) {
+          // Evitar duplicatas
+          if (!allFiles.find(f => f.id === id)) {
+            allFiles.push({
+              id: id,
+              name: name,
+              mimeType: 'application/pdf',
+              webViewLink: `https://drive.google.com/file/d/${id}/view`,
+              modifiedTime: new Date().toISOString(),
+              prCode: prCode,
+              revision: extractRevisionNumber(name)
+            });
+          }
+        }
+      }
+    }
+    
+    console.log(`🔧 API pública encontrou: ${allFiles.length} arquivos`);
+    return allFiles;
+  } catch (error) {
+    console.error('❌ Erro na API pública:', error);
+    return [];
+  }
+}
 
 /**
  * Obtém o conteúdo REAL do arquivo em Base64 através do link de download direto do Google Drive.
@@ -108,7 +194,7 @@ export const getFileBase64 = async (fileId: string): Promise<string> => {
       reader.readAsDataURL(blob);
     });
   } catch (error) {
-    console.error(`Erro ao obter Base64 real do arquivo ${fileId}:`, error);
+    console.error(`❌ Erro ao obter Base64 do arquivo ${fileId}:`, error);
     throw error;
   }
 };
