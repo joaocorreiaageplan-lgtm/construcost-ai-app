@@ -216,7 +216,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({ budget, onSave, onCancel }) => 
       <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
           <h2 className="text-xl font-bold text-gray-800">
-            {initialData ? 'Editar Orçamento' : 'Novo Orçamento Inteligente'}
+            {budget ? 'Editar Orçamento' : 'Novo Orçamento Inteligente'}
           </h2>
           <button onClick={onCancel} className="text-gray-500 hover:text-gray-700" disabled={isSaving}>
             <X className="w-6 h-6" />
