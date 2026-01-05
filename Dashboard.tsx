@@ -29,6 +29,7 @@ import { Budget, BudgetStatus } from '././types';
 
 interface DashboardProps {
   onDataUpdated?: () => void;
+    budgets: Budget[];
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onDataUpdated }) => {
