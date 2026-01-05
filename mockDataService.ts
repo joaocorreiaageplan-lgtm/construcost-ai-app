@@ -42,10 +42,13 @@ export const getBudgets = (): Budget[] => {
 
 export const extractPRCode = (str: string): string | null => {
   if (!str) return null;
-  const match = str.match(/PR\s?\d+/i);
-  return match ? match[0].toUpperCase().replace(/\s/g, '') : null;
+  // Captura PR seguido de 4 ou 5 dígitos (PR1724, PR01724, PR 01724, etc.)
+  const match = str.match(/[Pp][Rr]\s?0?(\d{4,5})/);
+  if (!match) return null;
+  // Retorna no formato padronizado: PR01724
+  const num = match[1].padStart(5, '0');
+  return `PR${num}`;
 };
-
 export const saveBudget = (budget: Budget): Budget => {
   const budgets = getBudgets();
   const index = budgets.findIndex(b => b.id === budget.id);
