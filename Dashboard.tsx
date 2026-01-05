@@ -125,7 +125,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onDataUpdated }) => {
       if (onDataUpdated) onDataUpdated();
       
     } catch (error: any) {
-      alert(`Erro na sincronização: ${error.message}`);
+          console.error('❌ Erro na sincronização:', error);
+    setSyncStatus(`Erro: ${error.message}`);
     } finally {
       setIsSyncing(false);
       setSyncStatus('');
