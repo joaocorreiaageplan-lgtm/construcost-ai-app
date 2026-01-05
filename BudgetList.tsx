@@ -4,7 +4,7 @@ import { Edit2, Trash2, Search, Filter, Plus, Clock, CheckCircle, XCircle } from
 
 interface BudgetListProps {
   budgets: Budget[];
-  onCreate: () => void;
+  onCreate?: () => void;
   onEdit: (budget: Budget) => void;
   onDelete: (id: string) => void;
   onRefresh?: () => void;
