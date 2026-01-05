@@ -19,13 +19,13 @@ import {
   saveBudgetsBatch, 
   getBudgets, 
   extractPRCode 
-} from '../services/mockDataService';
+} from './mockDataService';
 import { 
   listLatestPrFiles, 
   getFileBase64 
-} from '../services/driveService';
-import { extractBudgetDataFromFiles } from '../services/geminiService';
-import { Budget, BudgetStatus } from '../types';
+} from './driveService';
+import { extractBudgetDataFromFiles } from './geminiService';
+import { Budget, BudgetStatus } from '././types';
 
 interface DashboardProps {
   onDataUpdated?: () => void;
