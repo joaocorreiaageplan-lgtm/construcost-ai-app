@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Cloud, CheckCircle, RefreshCw, Folder, Mail, Bell, Key, Database, Download, ExternalLink, Info, ShieldCheck } from 'lucide-react';
-import { getSettings, saveSettings, AppSettings, getBudgets } from '../services/mockDataService';
-import { openAiStudioKeySelector, isKeySelected } from '../services/geminiService';
+import { getSettings, saveSettings, AppSettings, getBudgets } from './mockDataService'
+import { openAiStudioKeySelector, isKeySe'./geminiService'eminiService';
 
 const Settings: React.FC = () => {
   const [settings, setSettings] = useState<AppSettings>(getSettings());
@@ -18,7 +18,7 @@ const Settings: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setSettings(prev => ({
+    setSetti(prev: any)prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
