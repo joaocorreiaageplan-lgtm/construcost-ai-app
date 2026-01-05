@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Wand2, Loader2, Save, Image as ImageIcon } from 'lucide-react';
-import { editImageWithG'./geminiService'geminiService';
-
-const ImageEditor: React.FC = () => {
+import { editImageWithGemini } from './geminiService';
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
