@@ -17,8 +17,12 @@ const BudgetList: React.FC<BudgetListProps> = ({ budgets: propBudgets, onCreate,
   useEffect(() => {
     if (onRefresh) onRefresh();
   }, []);
-
-  const filteredBudgets = useMemo(() => {
+    }).sort((a, b) => {
+      // Ordenar por data em ordem decrescente (mais recente primeiro)
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
+    });  const filteredBudgets = useMemo(() => {
     return propBudgets.filter(budget => {
       const matchesSearch = 
         budget.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
