@@ -78,12 +78,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onDataUpdated }) => {
           setSyncStatus(`Processando IA: ${file.prCode}`);
 
           try {
-        // TEMPORÁRIO: Pular download de PDF devido a CORS - apenas logar descobertas
-        console.log(`📄 Encontrado: ${file.prCode} - ${file.name}`);
-        // const aiData = await extractBudgetDataFromFiles([{              name: file.name,
-        //     mimeType: 'application/pdf'            }]);
-        //   }]);            budgetsFromDrive.push({
+              const base64 = await getFileBase64(file.id);
+            onst aiData = await extractBudgetDataFromFiles([{              name: file.name,
+                                                                             url: base64,
+    mimeType: 'application/pdf'            }]);
+         }]);            budgetsFromDrive.push({
               id: '',
+                            date: aiData.date || new Date().toISOString().split('T')[0],
+                clientName: aiData.clientName || 'Cliente Detectado via Drive',
+                serviceDescription: `${file.prCode} - ${aiData.serviceDescription || file.name}`,
+                budgetAmount: aiData.budgetAmount || 25500,
+                discount: aiData.discount || 0,
+                orderConfirmation: !!aiData.orderNumber,
+                invoiceSent: false,
+                status: aiData.orderNumber ? BudgetStatus.APPROVED : BudgetStatus.PENDING,
+                orderNumber: aiData.orderNumber,
+                sentToClient: true,
           requester: "Monitoramento Drive",              files: [{
                 id: file.id,
                 name: file.name,
