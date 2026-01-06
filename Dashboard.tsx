@@ -80,17 +80,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onDataUpdated }) => {
           try {
         // TEMPORÁRIO: Pular download de PDF devido a CORS - apenas logar descobertas
         console.log(`📄 Encontrado: ${file.prCode} - ${file.name}`);
-        // const aiData = await extractBudgetDataFromFiles([{              name: file.name,
-        //     mimeType: 'application/pdf'            }]);
-        //   }]);            budgetsFromDrive.push({
-              id: '',
-          requester: "Monitoramento Drive",              files: [{
-                id: file.id,
-                name: file.name,
-                url: file.webViewLink,
-                type: 'pdf'
-              }]
-            });
+        // Drive scanning temporarily disabled
+            // Code removed due to CORS issues
             
             setDriveFindings(prev => ({ ...prev, processedFiles: prev.processedFiles + 1 }));
           } catch (e) {
