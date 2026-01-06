@@ -17,11 +17,6 @@ const BudgetList: React.FC<BudgetListProps> = ({ budgets: propBudgets, onCreate,
   useEffect(() => {
     if (onRefresh) onRefresh();
   }, []);
-    }).sort((a, b) => {
-      // Ordenar por data em ordem decrescente (mais recente primeiro)
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
     });  const filteredBudgets = useMemo(() => {
     return propBudgets.filter(budget => {
       const matchesSearch = 
@@ -31,7 +26,11 @@ const BudgetList: React.FC<BudgetListProps> = ({ budgets: propBudgets, onCreate,
       
       const matchesFilter = filterStatus === 'all' || budget.status === filterStatus;
       return matchesSearch && matchesFilter;
-    });
+    });.sort((a, b) => {
+    const dateA = a.date ? new Date(a.date).getTime() : 0;
+    const dateB = b.date ? new Date(b.date).getTime() : 0;
+    return dateB - dateA;
+  })
   }, [propBudgets, searchTerm, filterStatus]);
 
   const getStatusIcon = (status: BudgetStatus) => {
