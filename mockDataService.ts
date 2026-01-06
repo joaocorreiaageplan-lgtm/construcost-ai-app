@@ -159,12 +159,13 @@ export const syncWithGoogleSheets = async (): Promise<{added: number, updated: n
 
       const getV = (i: number) => cells[i] ? cells[i].v : null;
       const getF = (i: number) => cells[i] ? (cells[i].f || String(cells[i].v || '')) : '';
+            // New spreadsheet structure: A=Item, B=data, C=Nome Cliente, D=Descrição Serviços, E=Valor Orçamento164
+      
 
-      const rawDate = getF(0);
-      const client = String(getV(1) || '').trim();
-      const desc = String(getV(2) || '').trim();
-      const value = parseBRCurrency(getV(3) || getF(3));
-      const order = String(getV(5) || '').trim();
+      const rawDate = getF(1);            const client = String(getV(2) || '').trim();
+            const desc = String(getV(3) || '').trim();
+            const value = parseBRCurrency(getV(4) || getF(4));
+      const  order = String(getV(0) || '').trim();
       const rawStatus = String(getV(7) || '').toLowerCase();
 
       if (!client && !desc) return;
