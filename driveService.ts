@@ -180,8 +180,8 @@ async function fetchViaPublicAPI(): Promise<DriveFile[]> {
 export const getFileBase64 = async (fileId: string): Promise<string> => {
   try {
     // Link de download direto para arquivos públicos
-    const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
-    
+    // Usar proxy CORS para evitar erro de CORS ao baixar do Drive
+    const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://drive.google.com/uc?export=download&id=${fileId}`)}`;    
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Erro de download: ${response.status}`);
     
