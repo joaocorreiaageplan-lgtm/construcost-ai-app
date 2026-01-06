@@ -38,7 +38,7 @@ const BudgetList: React.FC<BudgetListProps> = ({ budgets: propBudgets, onCreate,
   const getStatusIcon = (status: BudgetStatus) => {
     switch (status) {
       case BudgetStatus.APPROVED: return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case BudgetStatus.REJECTED: return <XCircle className="w-4 h-4 text-red-500" />;
+      case BudgetStatus.NOT_APPROVED: return <XCircle className="w-4 h-4 text-red-500" />;
       default: return <Clock className="w-4 h-4 text-yellow-500" />;
     }
   };
