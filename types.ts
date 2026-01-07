@@ -6,6 +6,7 @@ export enum BudgetStatus {
 
 export interface Budget {
   id: string;
+    itemNumber?: number; // Column A from spreadsheet (830, 829, 828...)
   date: string; // ISO Date string
   clientName: string;
   serviceDescription: string;
