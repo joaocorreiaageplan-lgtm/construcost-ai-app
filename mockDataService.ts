@@ -226,3 +226,4 @@ export const getStats = (): any => {
     totalValueAll: budgets.reduce((acc, curr) => acc + (curr.budgetAmount - curr.discount), 0),
     invoicePendingCount: budgets.filter(b => b.status === BudgetStatus.APPROVED && !b.invoiceSent).length
   };
+  };
