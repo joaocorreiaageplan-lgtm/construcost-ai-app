@@ -159,14 +159,11 @@ export const syncWithGoogleSheets = async (): Promise<{added: number, updated: n
 
       const getV = (i: number) => cells[i] ? cells[i].v : null;
       const getF = (i: number) => cells[i] ? (cells[i].f || String(cells[i].v || '')) : '';
-      // Current spreadsheet structure: A=data, B=Nome Cliente, C=Descrição Serviços, D=Valor Orçamento, E=Desconto, F=Pedido, G=Envio de NF, H=Status do Orçamento, I=Data Pedido, J=Nota, K=Enviar, L=Solicitante      
 
-      const rawDate = getF(1);            const client = String(getV(2) || '').trim();
-            const desc = String(getV(3) || '').trim();
-            const value = parseBRCurrency(getV(4) || getF(4));
-      const  order = String(getV(0) || '').trim();
-      const rawStatus = String(getV(7) || '').toLowerCase();
-      const requester = String(getV(11) || '').trim(); // Column L: Solicitante
+      // Column A=item number, B=Nome Cliente, C=Descrição, D=Valor, E=Desconto, F=Pedido, G=Envio NF, H=Status, I=Data Pedido, J=Nota, K=Enviar, L=Solicitante
+      const itemNumber = getV(0); // Not used but Column A contains item number
+      const desc = String(getV(2) || '').trim();
+      const rawStatus = String(getV(7) || '').toLowerCase();      const requester = String(getV(11) || '').trim(); // Column L: Solicitante
 
       if (!client && !desc) return;
 
@@ -179,8 +176,8 @@ export const syncWithGoogleSheets = async (): Promise<{added: number, updated: n
 
       incomingBudgets.push({
         id: '', 
-        date: parseSheetDate(rawDate),
-        clientName: client || '---',
+      date: new Date().toISOString().split('T')[0], // No date column in spreadsheet, using current date
+      clientName: client || '---',
         serviceDescription: desc || '---',
         budgetAmount: value,
         discount: 0,
