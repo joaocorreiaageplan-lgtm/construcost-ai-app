@@ -181,7 +181,7 @@ export const syncWithGoogleSheets = async (): Promise<{added: number, updated: n
       }
       
       incomingBudgets.push({
-        id: '',
+              id: `item-${itemNumber || generateId()}`,
         itemNumber: parseInt(String(itemNumber || '0')), 
         date: new Date().toISOString().split('T')[0], // No date column in spreadsheet, using current date
         clientName: client || '---',
