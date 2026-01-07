@@ -70,7 +70,25 @@ export const saveBudgetsBatch = (newBudgets: Budget[]): void => {
   const currentBudgets = getBudgets();
   const budgetMap = new Map<string, Budget>();
   
-  currentBudgets.forEach(b => {
+  // Remove old duplicate budgets with empty or non-standard IDs
+  const cleanedBudgets = currentBudgets.filter((b, index, self) => {
+    // Keep budgets with proper item-* IDs
+    if (b.id && b.id.startsWith('item-')) return true;
+    
+    // For old budgets without proper ID, check if there's a newer version
+    const prCode = extractPRCode(b.serviceDescription);
+    if (prCode) {
+      // Check if there's a budget with proper ID for same PR
+      const hasProperId = self.some(other => 
+        other.id && other.id.startsWith('item-') && 
+        extractPRCode(other.serviceDescription) === prCode
+      );
+      return !hasProperId; // Keep only if no proper ID version exists
+    }
+    return true; // Keep if no PR code
+  });
+  
+  cleanedBudgets.forEach(b => {
     const key = b.id || generateId();
     budgetMap.set(key, b);
   });
