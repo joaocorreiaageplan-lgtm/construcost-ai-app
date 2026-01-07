@@ -35,13 +35,11 @@ export const getBudgets = (): Budget[] => {
       const numA = (a as any).itemNumber || 0;
       const numB = (b as any).itemNumber || 0;
       return numB - numA;
-    });    });
   } catch (e) {
     return [];
   }
-};
 
-export const extractPRCode = (str: string): string | null => {
+  export const extractPRCode = (str: string): string | null => {
   if (!str) return null;
   // Captura PR seguido de 4 ou 5 dígitos (PR1724, PR01724, PR 01724, etc.)
   const match = str.match(/[Pp][Rr]\s?0?(\d{4,5})/);
