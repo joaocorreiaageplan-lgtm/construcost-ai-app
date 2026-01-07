@@ -35,6 +35,7 @@ export const getBudgets = (): Budget[] => {
       const numA = (a as any).itemNumber || 0;
       const numB = (b as any).itemNumber || 0;
       return numB - numA;
+          });
   } catch (e) {
     return [];
   }
