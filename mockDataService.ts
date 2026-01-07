@@ -31,10 +31,11 @@ export const getBudgets = (): Budget[] => {
   try {
     const parsed = JSON.parse(data);
     return parsed.sort((a: Budget, b: Budget) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return dateB - dateA;
-    });
+      // Sort by itemNumber in descending order (830, 829, 828...)
+      const numA = (a as any).itemNumber || 0;
+      const numB = (b as any).itemNumber || 0;
+      return numB - numA;
+    });    });
   } catch (e) {
     return [];
   }
@@ -175,7 +176,8 @@ export const syncWithGoogleSheets = async (): Promise<{added: number, updated: n
       }
 
       incomingBudgets.push({
-        id: '', 
+        id: '',
+      itemNumber: parseInt(String(itemNumber || '0')), 
       date: new Date().toISOString().split('T')[0], // No date column in spreadsheet, using current date
       clientName: client || '---',
         serviceDescription: desc || '---',
