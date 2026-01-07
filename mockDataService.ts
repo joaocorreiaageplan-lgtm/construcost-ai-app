@@ -182,7 +182,7 @@ export const syncWithGoogleSheets = async (): Promise<{added: number, updated: n
       
       // Column A=item number, B=Nome Cliente, C=Descrição, D=Valor, E=Desconto, F=Pedido, G=Envio NF, H=Status, I=Data Pedido, J=Nota, K=Enviar, L=Solicitante
       const itemNumber = getV(0); // Column A: item number (830, 829, 828...)
-      const client = String(getV(1) || '').trim(); // Column B
+      const client = (getF(1) || String(getV(1) || '')).trim(); B
       const desc = String(getV(2) || '').trim(); // Column C
       const value = parseBRCurrency(getV(3) || getF(3)); // Column D
       const order = String(getV(5) || '').trim(); // Column F
