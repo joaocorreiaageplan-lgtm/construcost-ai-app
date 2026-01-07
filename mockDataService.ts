@@ -35,12 +35,13 @@ export const getBudgets = (): Budget[] => {
       const numA = (a as any).itemNumber || 0;
       const numB = (b as any).itemNumber || 0;
       return numB - numA;
-          });
+    });
   } catch (e) {
     return [];
   }
+};
 
-  export const extractPRCode = (str: string): string | null => {
+export const extractPRCode = (str: string): string | null => {
   if (!str) return null;
   // Captura PR seguido de 4 ou 5 dígitos (PR1724, PR01724, PR 01724, etc.)
   const match = str.match(/[Pp][Rr]\s?0?(\d{4,5})/);
@@ -49,6 +50,7 @@ export const getBudgets = (): Budget[] => {
   const num = match[1].padStart(5, '0');
   return `PR${num}`;
 };
+
 export const saveBudget = (budget: Budget): Budget => {
   const budgets = getBudgets();
   const index = budgets.findIndex(b => b.id === budget.id);
@@ -88,7 +90,7 @@ export const saveBudgetsBatch = (newBudgets: Budget[]): void => {
         break;
       }
     }
-
+    
     if (existingKey) {
       budgetMap.set(existingKey, { ...budgetMap.get(existingKey)!, ...nb, id: existingKey });
     } else {
@@ -96,7 +98,7 @@ export const saveBudgetsBatch = (newBudgets: Budget[]): void => {
       budgetMap.set(newId, { ...nb, id: newId });
     }
   });
-
+  
   localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(budgetMap.values())));
 };
 
@@ -139,7 +141,7 @@ const parseSheetDate = (dateVal: any): string => {
 export const syncWithGoogleSheets = async (): Promise<{added: number, updated: number}> => {
   const sheetName = encodeURIComponent('CONTROLE DE ORÇAMENTOS');
   const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}&range=A2:Z2000`;
-
+  
   try {
     const response = await fetch(url);
     const text = await response.text();
@@ -152,33 +154,37 @@ export const syncWithGoogleSheets = async (): Promise<{added: number, updated: n
     
     let addedCount = 0;
     let updatedCount = 0;
-
+    
     rows.forEach((rowObj: any) => {
       const cells = rowObj.c;
       if (!cells || cells.length < 3) return;
-
+      
       const getV = (i: number) => cells[i] ? cells[i].v : null;
       const getF = (i: number) => cells[i] ? (cells[i].f || String(cells[i].v || '')) : '';
-
+      
       // Column A=item number, B=Nome Cliente, C=Descrição, D=Valor, E=Desconto, F=Pedido, G=Envio NF, H=Status, I=Data Pedido, J=Nota, K=Enviar, L=Solicitante
-      const itemNumber = getV(0); // Not used but Column A contains item number
-      const desc = String(getV(2) || '').trim();
-      const rawStatus = String(getV(7) || '').toLowerCase();      const requester = String(getV(11) || '').trim(); // Column L: Solicitante
-
+      const itemNumber = getV(0); // Column A: item number (830, 829, 828...)
+      const client = String(getV(1) || '').trim(); // Column B
+      const desc = String(getV(2) || '').trim(); // Column C
+      const value = parseBRCurrency(getV(3) || getF(3)); // Column D
+      const order = String(getV(5) || '').trim(); // Column F
+      const rawStatus = String(getV(7) || '').toLowerCase(); // Column H
+      const requester = String(getV(11) || '').trim(); // Column L: Solicitante
+      
       if (!client && !desc) return;
-
+      
       let status = BudgetStatus.PENDING;
       if (rawStatus.includes('não') || rawStatus.includes('rejeitado') || rawStatus.includes('recusado')) {
         status = BudgetStatus.NOT_APPROVED;
       } else if (rawStatus.includes('aprovado') || rawStatus.includes('fechado') || order.length > 2) {
         status = BudgetStatus.APPROVED;
       }
-
+      
       incomingBudgets.push({
         id: '',
-      itemNumber: parseInt(String(itemNumber || '0')), 
-      date: new Date().toISOString().split('T')[0], // No date column in spreadsheet, using current date
-      clientName: client || '---',
+        itemNumber: parseInt(String(itemNumber || '0')), 
+        date: new Date().toISOString().split('T')[0], // No date column in spreadsheet, using current date
+        clientName: client || '---',
         serviceDescription: desc || '---',
         budgetAmount: value,
         discount: 0,
@@ -187,11 +193,11 @@ export const syncWithGoogleSheets = async (): Promise<{added: number, updated: n
         status: status,
         orderNumber: order,
         sendToClient: true,
-      requester: requester || "Google Sheets",     
-      files: []
+        requester: requester || "Google Sheets", 
+        files: []
       });
     });
-
+    
     incomingBudgets.forEach(nb => {
       const nbPR = extractPRCode(nb.serviceDescription);
       const exists = currentBudgets.some(b => {
@@ -201,7 +207,7 @@ export const syncWithGoogleSheets = async (): Promise<{added: number, updated: n
       });
       if (exists) updatedCount++; else addedCount++;
     });
-
+    
     saveBudgetsBatch(incomingBudgets);
     return { added: addedCount, updated: updatedCount };
   } catch (error: any) {
@@ -226,4 +232,4 @@ export const getStats = (): any => {
     totalValueAll: budgets.reduce((acc, curr) => acc + (curr.budgetAmount - curr.discount), 0),
     invoicePendingCount: budgets.filter(b => b.status === BudgetStatus.APPROVED && !b.invoiceSent).length
   };
-  };
+};
